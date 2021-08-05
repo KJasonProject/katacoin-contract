@@ -32,7 +32,7 @@ contract KINU is ERC20, Ownable {
     uint256 public constant TOTAL_FEES = ETH_REWARDS_FEE + LIQUIDITY_FEE;
 
     // burn percentage per transaction
-    uint256 public constant BUYBACK_FEE = 3;
+    uint256 public constant BUYBACK_FEE = 2;
 
     // use by default 150,000 gas to process auto-claiming dividends
     uint256 public gasForProcessing = 150000;
@@ -368,8 +368,10 @@ contract KINU is ERC20, Ownable {
             super._transfer(from, address(this), fees);
         }
 
+        if (from != uniswapV2Pair && to != uniswapV2Pair) {
+            super._burn(from, buyback_fee);
+        }
         super._transfer(from, to, amount.sub(buyback_fee));
-        super._burn(from, buyback_fee);
 
         try dividendTracker.setBalance(payable(from), balanceOf(from)) {} catch {}
         try dividendTracker.setBalance(payable(to), balanceOf(to)) {} catch {}
