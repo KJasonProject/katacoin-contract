@@ -1,16 +1,16 @@
-# kinucoin-contract
-Solidity contract for KINU Coin.
+# katacoin-contract
+Solidity contract for KATA Coin.
 
 1. Clone repo
 
 ```shell
-https://github.com/KJasonProject/kinucoin-contract
+https://github.com/KJasonProject/katacoin-contract
 ```
 
 2. Install npm packages
 
 ```shell
-cd kinucoin-contract
+cd katacoin-contract
 npm install
 ```
 

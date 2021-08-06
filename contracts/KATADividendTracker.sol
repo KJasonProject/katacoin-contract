@@ -7,7 +7,7 @@ import "./SafeMath.sol";
 import "./IterableMapping.sol";
 import "./Ownable.sol";
 
-contract KINUDividendTracker is DividendPayingToken, Ownable {
+contract KATADividendTracker is DividendPayingToken, Ownable {
     using SafeMath for uint256;
     using SafeMathInt for int256;
     using IterableMapping for IterableMapping.Map;
@@ -28,16 +28,16 @@ contract KINUDividendTracker is DividendPayingToken, Ownable {
 
     event Claim(address indexed account, uint256 amount, bool indexed automatic);
 
-    constructor() DividendPayingToken("KINU_Dividend_Tracker", "KINU_Dividend_Tracker") {
+    constructor() DividendPayingToken("KATA_Dividend_Tracker", "KATA_Dividend_Tracker") {
         claimWait = 3600;
     }
 
     function _transfer(address, address, uint256) internal pure override {
-        require(false, "KINU_Dividend_Tracker: No transfers allowed");
+        require(false, "KATA_Dividend_Tracker: No transfers allowed");
     }
 
     function withdrawDividend() public pure override {
-        require(false, "KINU_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main KINU contract.");
+        require(false, "KATA_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main KATA contract.");
     }
 
     function excludeFromDividends(address account) external onlyOwner {
@@ -51,14 +51,14 @@ contract KINUDividendTracker is DividendPayingToken, Ownable {
     }
 
     function updateGasForTransfer(uint256 newGasForTransfer) external onlyOwner {
-        require(newGasForTransfer != gasForTransfer, "KINU_Dividend_Tracker: Cannot update gasForTransfer to same value");
+        require(newGasForTransfer != gasForTransfer, "KATA_Dividend_Tracker: Cannot update gasForTransfer to same value");
         emit GasForTransferUpdated(newGasForTransfer, gasForTransfer);
         gasForTransfer = newGasForTransfer;
     }
 
     function updateClaimWait(uint256 newClaimWait) external onlyOwner {
-        require(newClaimWait >= 3600 && newClaimWait <= 86400, "KINU_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
-        require(newClaimWait != claimWait, "KINU_Dividend_Tracker: Cannot update claimWait to same value");
+        require(newClaimWait >= 3600 && newClaimWait <= 86400, "KATA_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
+        require(newClaimWait != claimWait, "KATA_Dividend_Tracker: Cannot update claimWait to same value");
         emit ClaimWaitUpdated(newClaimWait, claimWait);
         claimWait = newClaimWait;
     }

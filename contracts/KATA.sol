@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.4;
 
-import "./KINUDividendTracker.sol";
+import "./KATADividendTracker.sol";
 import "./FTPAntiBot.sol";
 import "./SafeMath.sol";
 import "./Ownable.sol";
@@ -10,7 +10,7 @@ import "./IUniswapV2Pair.sol";
 import "./IUniswapV2Factory.sol";
 import "./IUniswapV2Router.sol";
 
-contract KINU is ERC20, Ownable {
+contract KATA is ERC20, Ownable {
     using SafeMath for uint256;
 
     FTPAntiBot private antiBot;
@@ -21,7 +21,7 @@ contract KINU is ERC20, Ownable {
 
     bool private liquidating;
 
-    KINUDividendTracker public dividendTracker;
+    KATADividendTracker public dividendTracker;
 
     address public liquidityWallet;
 
@@ -44,7 +44,7 @@ contract KINU is ERC20, Ownable {
     bool public tradingEnabled;
 
     function activate() public onlyOwner {
-        require(!tradingEnabled, "KINU: Trading is already enabled");
+        require(!tradingEnabled, "KATA: Trading is already enabled");
         tradingEnabled = true;
     }
 
@@ -94,10 +94,10 @@ contract KINU is ERC20, Ownable {
         address indexed processor
     );
 
-    constructor() ERC20("KINU", "KINU") {
+    constructor() ERC20("KATA", "KATA") {
         assert(TOTAL_FEES == 6);
 
-        dividendTracker = new KINUDividendTracker();
+        dividendTracker = new KATADividendTracker();
         liquidityWallet = owner();
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
@@ -137,11 +137,11 @@ contract KINU is ERC20, Ownable {
     }
 
     function updateDividendTracker(address newAddress) public onlyOwner {
-        require(newAddress != address(dividendTracker), "KINU: The dividend tracker already has that address");
+        require(newAddress != address(dividendTracker), "KATA: The dividend tracker already has that address");
 
-        KINUDividendTracker newDividendTracker = KINUDividendTracker(payable(newAddress));
+        KATADividendTracker newDividendTracker = KATADividendTracker(payable(newAddress));
 
-        require(newDividendTracker.owner() == address(this), "KINU: The new dividend tracker must be owned by the KINU token contract");
+        require(newDividendTracker.owner() == address(this), "KATA: The new dividend tracker must be owned by the KATA token contract");
 
         newDividendTracker.excludeFromDividends(address(newDividendTracker));
         newDividendTracker.excludeFromDividends(address(this));
@@ -154,24 +154,24 @@ contract KINU is ERC20, Ownable {
     }
 
     function updateUniswapV2Router(address newAddress) public onlyOwner {
-        require(newAddress != address(uniswapV2Router), "KINU: The router already has that address");
+        require(newAddress != address(uniswapV2Router), "KATA: The router already has that address");
         emit UpdatedUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
     }
 
     function excludeFromFees(address account) public onlyOwner {
-        require(!_isExcludedFromFees[account], "KINU: Account is already excluded from fees");
+        require(!_isExcludedFromFees[account], "KATA: Account is already excluded from fees");
         _isExcludedFromFees[account] = true;
     }
 
     function setAutomatedMarketMakerPair(address pair, bool value) public onlyOwner {
-        require(pair != uniswapV2Pair, "KINU: The Uniswap pair cannot be removed from automatedMarketMakerPairs");
+        require(pair != uniswapV2Pair, "KATA: The Uniswap pair cannot be removed from automatedMarketMakerPairs");
 
         _setAutomatedMarketMakerPair(pair, value);
     }
 
     function _setAutomatedMarketMakerPair(address pair, bool value) private {
-        require(automatedMarketMakerPairs[pair] != value, "KINU: Automated market maker pair is already set to that value");
+        require(automatedMarketMakerPairs[pair] != value, "KATA: Automated market maker pair is already set to that value");
         automatedMarketMakerPairs[pair] = value;
 
         if (value) {
@@ -182,12 +182,12 @@ contract KINU is ERC20, Ownable {
     }
 
     function allowTransferBeforeTradingIsEnabled(address account) public onlyOwner {
-        require(!canTransferBeforeTradingIsEnabled[account], "KINU: Account is already allowed to transfer before trading is enabled");
+        require(!canTransferBeforeTradingIsEnabled[account], "KATA: Account is already allowed to transfer before trading is enabled");
         canTransferBeforeTradingIsEnabled[account] = true;
     }
 
     function updateLiquidityWallet(address newLiquidityWallet) public onlyOwner {
-        require(newLiquidityWallet != liquidityWallet, "KINU: The liquidity wallet is already this address");
+        require(newLiquidityWallet != liquidityWallet, "KATA: The liquidity wallet is already this address");
         excludeFromFees(newLiquidityWallet);
         emit LiquidityWalletUpdated(newLiquidityWallet, liquidityWallet);
         liquidityWallet = newLiquidityWallet;
@@ -195,14 +195,14 @@ contract KINU is ERC20, Ownable {
 
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
         // Need to make gas fee customizable to future-proof against Ethereum network upgrades.
-        require(newValue != gasForProcessing, "KINU: Cannot update gasForProcessing to same value");
+        require(newValue != gasForProcessing, "KATA: Cannot update gasForProcessing to same value");
         emit GasForProcessingUpdated(newValue, gasForProcessing);
         gasForProcessing = newValue;
     }
 
     function updateLiquidationThreshold(uint256 newValue) external onlyOwner {
-        require(newValue <= 200000 * (10 ** 18), "KINU: liquidateTokensAtAmount must be less than 200,000");
-        require(newValue != liquidateTokensAtAmount, "KINU: Cannot update gasForProcessing to same value");
+        require(newValue <= 200000 * (10 ** 18), "KATA: liquidateTokensAtAmount must be less than 200,000");
+        require(newValue != liquidateTokensAtAmount, "KATA: Cannot update gasForProcessing to same value");
         emit LiquidationThresholdUpdated(newValue, liquidateTokensAtAmount);
         liquidateTokensAtAmount = newValue;
     }
@@ -306,7 +306,7 @@ contract KINU is ERC20, Ownable {
 
         // only whitelisted addresses can make transfers before the public presale is over.
         if (!tradingIsEnabled) {
-            require(canTransferBeforeTradingIsEnabled[from], "KINU: This account cannot send tokens until trading is enabled");
+            require(canTransferBeforeTradingIsEnabled[from], "KATA: This account cannot send tokens until trading is enabled");
         }
 
         if (useAntiBot) {
