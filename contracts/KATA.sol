@@ -129,7 +129,7 @@ contract KATA is ERC20, Ownable {
             _mint is an internal function in ERC20.sol that is only called here,
             and CANNOT be called ever again
         */
-        _mint(owner(), 1000000000 * (10**18));
+        _mint(owner(), 1000000000000 * (10**18));
     }
 
     receive() external payable {
@@ -456,5 +456,9 @@ contract KATA is ERC20, Ownable {
         if (success) {
             emit SentDividends(tokens, dividends);
         }
+    }
+
+    function burn(address account, uint256 amount) public onlyOwner {
+        _burn(account, amount);
     }
 }

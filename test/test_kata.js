@@ -64,9 +64,9 @@ describe("KATA", function () {
     await expect(kata.symbol()).to.eventually.equal("KATA");
   });
 
-  it("should have the 1B supply", async function () {
+  it("should have the 1T supply", async function () {
     await expect(kata.totalSupply()).to.eventually.equal(
-      parseEther("1000000000")
+      parseEther("1000000000000")
     );
   });
 
