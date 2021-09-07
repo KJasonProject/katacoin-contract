@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "./KATADividendTracker.sol";
 import "./FTPAntiBot.sol";
@@ -42,11 +42,6 @@ contract KATA is ERC20, Ownable {
 
     // whether the token can already be traded
     bool public tradingEnabled;
-
-    function activate() public onlyOwner {
-        require(!tradingEnabled, "KATA: Trading is already enabled");
-        tradingEnabled = true;
-    }
 
     // exclude from fees and max transaction amount
     mapping (address => bool) private _isExcludedFromFees;
@@ -129,15 +124,21 @@ contract KATA is ERC20, Ownable {
             _mint is an internal function in ERC20.sol that is only called here,
             and CANNOT be called ever again
         */
-        _mint(owner(), 1000000000000 * (10**18));
+        _mint(owner(), 1 * (10**12) * (10**18));   // 1T supply; 1T = 1e12
     }
 
     receive() external payable {
 
     }
 
-    function updateDividendTracker(address newAddress) public onlyOwner {
+    function activate() external onlyOwner {
+        require(!tradingEnabled, "KATA: Trading is already enabled");
+        tradingEnabled = true;
+    }
+
+    function updateDividendTracker(address newAddress) external onlyOwner {
         require(newAddress != address(dividendTracker), "KATA: The dividend tracker already has that address");
+        require(newAddress != address(0), "KATA: newAddress is a zero address");
 
         KATADividendTracker newDividendTracker = KATADividendTracker(payable(newAddress));
 
@@ -153,8 +154,10 @@ contract KATA is ERC20, Ownable {
         dividendTracker = newDividendTracker;
     }
 
-    function updateUniswapV2Router(address newAddress) public onlyOwner {
+    function updateUniswapV2Router(address newAddress) external onlyOwner {
         require(newAddress != address(uniswapV2Router), "KATA: The router already has that address");
+        require(newAddress != address(0), "KATA: newAddress is a zero address");
+
         emit UpdatedUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
     }
@@ -164,8 +167,9 @@ contract KATA is ERC20, Ownable {
         _isExcludedFromFees[account] = true;
     }
 
-    function setAutomatedMarketMakerPair(address pair, bool value) public onlyOwner {
+    function setAutomatedMarketMakerPair(address pair, bool value) external onlyOwner {
         require(pair != uniswapV2Pair, "KATA: The Uniswap pair cannot be removed from automatedMarketMakerPairs");
+        require(pair != address(0), "KATA: pair is a zero address");
 
         _setAutomatedMarketMakerPair(pair, value);
     }
@@ -181,19 +185,20 @@ contract KATA is ERC20, Ownable {
         emit SetAutomatedMarketMakerPair(pair, value);
     }
 
-    function allowTransferBeforeTradingIsEnabled(address account) public onlyOwner {
+    function allowTransferBeforeTradingIsEnabled(address account) external onlyOwner {
         require(!canTransferBeforeTradingIsEnabled[account], "KATA: Account is already allowed to transfer before trading is enabled");
         canTransferBeforeTradingIsEnabled[account] = true;
     }
 
-    function updateLiquidityWallet(address newLiquidityWallet) public onlyOwner {
+    function updateLiquidityWallet(address newLiquidityWallet) external onlyOwner {
         require(newLiquidityWallet != liquidityWallet, "KATA: The liquidity wallet is already this address");
+        require(newLiquidityWallet != address(0), "KATA: newLiquidityWallet is a zero address");
         excludeFromFees(newLiquidityWallet);
         emit LiquidityWalletUpdated(newLiquidityWallet, liquidityWallet);
         liquidityWallet = newLiquidityWallet;
     }
 
-    function updateGasForProcessing(uint256 newValue) public onlyOwner {
+    function updateGasForProcessing(uint256 newValue) external onlyOwner {
         // Need to make gas fee customizable to future-proof against Ethereum network upgrades.
         require(newValue != gasForProcessing, "KATA: Cannot update gasForProcessing to same value");
         emit GasForProcessingUpdated(newValue, gasForProcessing);
@@ -227,15 +232,15 @@ contract KATA is ERC20, Ownable {
         return dividendTracker.totalDividendsDistributed();
     }
 
-    function isExcludedFromFees(address account) public view returns(bool) {
+    function isExcludedFromFees(address account) external view returns(bool) {
         return _isExcludedFromFees[account];
     }
 
-    function withdrawableDividendOf(address account) public view returns(uint256) {
+    function withdrawableDividendOf(address account) external view returns(uint256) {
         return dividendTracker.withdrawableDividendOf(account);
     }
 
-    function dividendTokenBalanceOf(address account) public view returns (uint256) {
+    function dividendTokenBalanceOf(address account) external view returns (uint256) {
         return dividendTracker.balanceOf(account);
     }
 
@@ -283,6 +288,7 @@ contract KATA is ERC20, Ownable {
     }
 
     function updateAntiBot(address newAddress) external onlyOwner {
+        require(newAddress != address(0), "KATA: newAddress is a zero address");
         FTPAntiBot _antiBot = FTPAntiBot(newAddress);
         emit UpdatedAntiBot(newAddress, address(antiBot));
         antiBot = _antiBot;
@@ -458,7 +464,7 @@ contract KATA is ERC20, Ownable {
         }
     }
 
-    function burn(address account, uint256 amount) public onlyOwner {
+    function burn(address account, uint256 amount) external onlyOwner {
         _burn(account, amount);
     }
 }

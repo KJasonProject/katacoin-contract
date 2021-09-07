@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 /**
  * @title SafeMathUint
@@ -9,7 +9,7 @@ pragma solidity ^0.8.4;
 library SafeMathUint {
     function toInt256Safe(uint256 a) internal pure returns (int256) {
         int256 b = int256(a);
-        require(b >= 0);
+        require(b >= 0, "SafeMathUint: Unexpected result of conversion");
         return b;
     }
 }

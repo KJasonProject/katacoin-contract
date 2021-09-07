@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "./ERC20.sol";
 import "./SafeMath.sol";
@@ -69,7 +69,7 @@ contract DividendPayingToken is ERC20, DividendPayingTokenInterface, DividendPay
     ///     but keeping track of such data on-chain costs much more than
     ///     the saved ether, so we don't do that.
     function distributeDividends() public override payable {
-        require(totalSupply() > 0);
+        require(totalSupply() > 0, "Total Supply should be greater than zero");
 
         if (msg.value > 0) {
             magnifiedDividendPerShare = magnifiedDividendPerShare.add(
@@ -83,7 +83,7 @@ contract DividendPayingToken is ERC20, DividendPayingTokenInterface, DividendPay
 
     /// @notice Withdraws the ether distributed to the sender.
     /// @dev It emits a `DividendWithdrawn` event if the amount of withdrawn ether is greater than 0.
-    function withdrawDividend() public virtual override {
+    function withdrawDividend() external virtual override {
         _withdrawDividendOfUser(payable(msg.sender));
     }
 
@@ -111,7 +111,7 @@ contract DividendPayingToken is ERC20, DividendPayingTokenInterface, DividendPay
     /// @notice View the amount of dividend in wei that an address can withdraw.
     /// @param _owner The address of a token holder.
     /// @return The amount of dividend in wei that `_owner` can withdraw.
-    function dividendOf(address _owner) public view override returns(uint256) {
+    function dividendOf(address _owner) external view override returns(uint256) {
         return withdrawableDividendOf(_owner);
     }
 
@@ -125,7 +125,7 @@ contract DividendPayingToken is ERC20, DividendPayingTokenInterface, DividendPay
     /// @notice View the amount of dividend in wei that an address has withdrawn.
     /// @param _owner The address of a token holder.
     /// @return The amount of dividend in wei that `_owner` has withdrawn.
-    function withdrawnDividendOf(address _owner) public view override returns(uint256) {
+    function withdrawnDividendOf(address _owner) external view override returns(uint256) {
         return withdrawnDividends[_owner];
     }
 
@@ -146,11 +146,11 @@ contract DividendPayingToken is ERC20, DividendPayingTokenInterface, DividendPay
     /// @param to The address to transfer to.
     /// @param value The amount to be transferred.
     function _transfer(address from, address to, uint256 value) internal virtual override {
-        require(false);
+        require(false, "This function should be overrided");
 
-        int256 _magCorrection = magnifiedDividendPerShare.mul(value).toInt256Safe();
-        magnifiedDividendCorrections[from] = magnifiedDividendCorrections[from].add(_magCorrection);
-        magnifiedDividendCorrections[to] = magnifiedDividendCorrections[to].sub(_magCorrection);
+        // int256 _magCorrection = magnifiedDividendPerShare.mul(value).toInt256Safe();
+        // magnifiedDividendCorrections[from] = magnifiedDividendCorrections[from].add(_magCorrection);
+        // magnifiedDividendCorrections[to] = magnifiedDividendCorrections[to].sub(_magCorrection);
     }
 
     /// @dev Internal function that mints tokens to an account.

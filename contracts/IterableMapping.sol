@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
+
+import "./SafeMathUint.sol";
 
 library IterableMapping {
+    
+    using SafeMathUint for uint256;
     // Iterable mapping from address to uint;
     struct Map {
         address[] keys;
@@ -18,10 +22,11 @@ library IterableMapping {
         if(!map.inserted[key]) {
             return -1;
         }
-        return int(map.indexOf[key]);
+        return map.indexOf[key].toInt256Safe();
     }
 
     function getKeyAtIndex(Map storage map, uint index) public view returns (address) {
+        require(index < map.keys.length,"index should be less than the length of keys");
         return map.keys[index];
     }
 

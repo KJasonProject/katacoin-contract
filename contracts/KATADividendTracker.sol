@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "./DividendPayingToken.sol";
 import "./SafeMath.sol";
@@ -9,6 +9,7 @@ import "./Ownable.sol";
 
 contract KATADividendTracker is DividendPayingToken, Ownable {
     using SafeMath for uint256;
+    using SafeMathUint for uint256;
     using SafeMathInt for int256;
     using IterableMapping for IterableMapping.Map;
 
@@ -36,12 +37,12 @@ contract KATADividendTracker is DividendPayingToken, Ownable {
         require(false, "KATA_Dividend_Tracker: No transfers allowed");
     }
 
-    function withdrawDividend() public pure override {
+    function withdrawDividend() external pure override {
         require(false, "KATA_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main KATA contract.");
     }
 
     function excludeFromDividends(address account) external onlyOwner {
-        require(!excludedFromDividends[account]);
+        require(!excludedFromDividends[account], "This account is already excluded from dividends");
         excludedFromDividends[account] = true;
 
         _setBalance(account, 0);
@@ -89,10 +90,10 @@ contract KATADividendTracker is DividendPayingToken, Ownable {
 
         if (index >= 0) {
             if (uint256(index) > lastProcessedIndex) {
-                iterationsUntilProcessed = index.sub(int256(lastProcessedIndex));
+                iterationsUntilProcessed = index.sub(lastProcessedIndex.toInt256Safe());
             } else {
                 uint256 processesUntilEndOfArray = tokenHoldersMap.keys.length > lastProcessedIndex ? tokenHoldersMap.keys.length.sub(lastProcessedIndex) : 0;
-                iterationsUntilProcessed = index.add(int256(processesUntilEndOfArray));
+                iterationsUntilProcessed = index.add(processesUntilEndOfArray.toInt256Safe());
             }
         }
 
@@ -105,7 +106,7 @@ contract KATADividendTracker is DividendPayingToken, Ownable {
     }
 
     function getAccountAtIndex(uint256 index)
-    public view returns (
+    external view returns (
         address,
         int256,
         int256,
@@ -145,7 +146,7 @@ contract KATADividendTracker is DividendPayingToken, Ownable {
         processAccount(account, true);
     }
 
-    function process(uint256 gas) public returns (uint256, uint256, uint256) {
+    function process(uint256 gas) external returns (uint256, uint256, uint256) {
         uint256 numberOfTokenHolders = tokenHoldersMap.keys.length;
 
         if (numberOfTokenHolders == 0) {
